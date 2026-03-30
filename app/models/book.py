@@ -15,7 +15,7 @@ class Book(Base):
     published_year: Mapped[int] = mapped_column(SmallInteger, nullable=True)
     pages: Mapped[int] = mapped_column(Integer, nullable=True)
     author_id: Mapped[int] = mapped_column(
-        ForeignKey("authors.id", ondelete="CASCADE"), unique=True, nullable=False
+        ForeignKey("authors.id", ondelete="CASCADE"), nullable=False
     )
 
     author: Mapped["Author"] = relationship("Author", back_populates="books")

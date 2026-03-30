@@ -5,7 +5,7 @@ from app.models import *
 from app.routers.authors import router as authors_router
 
 
-Base.metadata.create_all(engine)
+Base.metadata.create_all(engine)  
 
 app = FastAPI(title="Library API")
 
