@@ -42,7 +42,9 @@ def get_genre_by_id(db: Session, id: int) -> Genre:
     genre = db.query(Genre).filter(Genre.id == id).first()
 
     if genre is None:
-        raise HTTPException(status_code=404, detail="Genre with given ID does not exist")
+        raise HTTPException(
+            status_code=404, detail="Genre with given ID does not exist"
+        )
 
     return genre
 
@@ -51,7 +53,9 @@ def get_genre_by_name(db: Session, name: str) -> Genre:
     genre = db.query(Genre).filter(Genre.name == name).first()
 
     if genre:
-        raise HTTPException(status_code=400, detail="New name already used by another genre")
+        raise HTTPException(
+            status_code=400, detail="New name already used by another genre"
+        )
 
     return name
 

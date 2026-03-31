@@ -3,7 +3,13 @@ from typing import Annotated
 from fastapi import APIRouter, Query, Path, Body
 
 from app.dependencies import get_db
-from app.crud.book import get_books, create_book, get_book_by_id, update_book_by_id, delete_book_by_id
+from app.crud.book import (
+    get_books,
+    create_book,
+    get_book_by_id,
+    update_book_by_id,
+    delete_book_by_id,
+)
 from app.schemas.book import BookListResponse, BookItemResponse, CreateBook, UpdateBook
 from app.schemas.genre import GenreResponse
 from app.schemas.author import AuthorResponse
@@ -137,13 +143,24 @@ async def get_genre_by_id_view(id: Annotated[int, Path(gt=0)]):
 
     return book_response
 
+
 @router.patch("/api/books/{id}")
 async def update_book_by_id_view(
     id: Annotated[int, Path(gt=0)], data: Annotated[UpdateBook, Body] = None
 ):
     db = next(get_db())
 
-    book = update_book_by_id(db=db, id=id, title=data.title, description=data.description, isbn=data.isbn, published_year=data.published_year, pages=data.pages, author_id=data.author_id, genre_ids=data.genre_ids)
+    book = update_book_by_id(
+        db=db,
+        id=id,
+        title=data.title,
+        description=data.description,
+        isbn=data.isbn,
+        published_year=data.published_year,
+        pages=data.pages,
+        author_id=data.author_id,
+        genre_ids=data.genre_ids,
+    )
 
     author = AuthorResponse(
         id=book.author.id,

@@ -51,7 +51,9 @@ def get_author_by_id(db: Session, id: int) -> Author:
     author = db.query(Author).filter(Author.id == id).first()
 
     if author is None:
-        raise HTTPException(status_code=404, detail="Author with given ID does not exist")
+        raise HTTPException(
+            status_code=404, detail="Author with given ID does not exist"
+        )
 
     return author
 

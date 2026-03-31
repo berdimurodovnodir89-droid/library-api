@@ -38,7 +38,7 @@ class CreateBook(BaseModel):
         if not v.strip():
             raise ValueError("Cannot be empty or whitespace only")
         return v.strip()
-    
+
 
 class UpdateBook(BaseModel):
     title: str | None = Field(default=None, min_length=1)

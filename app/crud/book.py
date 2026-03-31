@@ -106,7 +106,7 @@ def update_book_by_id(
     existing_book = get_book_by_id(db, id)
 
     if title:
-        existing_book.title = title 
+        existing_book.title = title
     if description:
         existing_book.description = description
     if isbn:
@@ -126,10 +126,7 @@ def update_book_by_id(
         db.query(BookGenre).filter(BookGenre.book_id == id).delete()
 
         if genre_ids:
-            new_relations = [
-                BookGenre(book_id=id, genre_id=g_id)
-                for g_id in genre_ids
-            ]
+            new_relations = [BookGenre(book_id=id, genre_id=g_id) for g_id in genre_ids]
             db.add_all(new_relations)
             db.commit()
 
@@ -140,7 +137,7 @@ def update_book_by_id(
     return existing_book
 
 
-def delete_book_by_id(db: Session, id: int) -> bool|None:
+def delete_book_by_id(db: Session, id: int) -> bool | None:
     existing_book = get_book_by_id(db, id)
 
     genres = existing_book.book_genres

@@ -88,15 +88,14 @@ async def update_author_by_id_view(
 ):
     db = next(get_db())
 
-    
     author = update_author_by_id(
-            db=db,
-            id=id,
-            first_name=data.first_name,
-            last_name=data.last_name,
-            bio=data.bio,
-            born_date=data.born_date,
-        )
+        db=db,
+        id=id,
+        first_name=data.first_name,
+        last_name=data.last_name,
+        bio=data.bio,
+        born_date=data.born_date,
+    )
 
     response = AuthorResponse(
         id=author.id,
@@ -138,7 +137,7 @@ async def get_author_books_view(
     for book in books:
         book_genres = book.book_genres
         genres: list[Genre] = [b.genre for b in book_genres]
-        
+
         genres = [
             GenreResponse(id=g.id, name=g.name, description=g.description)
             for g in genres

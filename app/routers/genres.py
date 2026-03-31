@@ -45,7 +45,6 @@ async def get_genres_view(
 async def create_genre_view(data: Annotated[GenreCreate, Body]):
     db = next(get_db())
 
-    
     genre = create_genre(db=db, name=data.name, description=data.description)
 
     response = GenreResponse(
@@ -74,10 +73,9 @@ async def update_genre_by_id_view(
 ):
     db = next(get_db())
 
-    
     genre = update_genre_by_id(
-            db=db, id=id, name=data.name, description=data.description
-        )
+        db=db, id=id, name=data.name, description=data.description
+    )
 
     response = GenreResponse(id=id, name=genre.name, description=genre.description)
 
@@ -87,7 +85,7 @@ async def update_genre_by_id_view(
 @router.delete("/api/genres/{id}", status_code=204)
 async def delete_genre_by_id_view(id: Annotated[int, Path(gt=0)]):
     db = next(get_db())
-    
+
     genre = delete_genre_by_id(db=db, id=id)
 
 
