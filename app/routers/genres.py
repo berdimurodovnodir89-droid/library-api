@@ -1,10 +1,9 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Query, Path, HTTPException, Body, status, Depends
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import APIRouter, Query, Path, HTTPException, Body, Depends
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db
+from app.dependencies import get_db, get_user
 from app.schemas.genre import (
     GenresResponse,
     GenreCreate,
@@ -22,26 +21,19 @@ from app.crud.genre import (
     delete_genre_by_id,
     get_genre_books,
 )
-from app.security import verify_token
+from app.models import User
 
 router = APIRouter(tags=["genres"])
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 @router.get("/api/genres", response_model=GenresResponse, status_code=200)
 async def get_genres_view(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user: Annotated[User, Depends(get_user)],
     db: Annotated[Session, Depends(get_db)],
     search: Annotated[str, Query()] = "",
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=0, le=100)] = 20,
 ):
-    payload = verify_token(token)
-
-    if payload is None:
-        raise HTTPException(status_code=401, detail="invalid token.")
-
     genres = get_genres(db, search, skip, limit)
 
     response = GenresResponse(
@@ -53,15 +45,10 @@ async def get_genres_view(
 
 @router.post("/api/genres", status_code=201)
 async def create_genre_view(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user: Annotated[User, Depends(get_user)],
     db: Annotated[Session, Depends(get_db)],
     data: Annotated[GenreCreate, Body],
 ):
-    payload = verify_token(token)
-
-    if payload is None:
-        raise HTTPException(status_code=401, detail="invalid token.")
-
     genre = create_genre(db=db, name=data.name, description=data.description)
 
     response = GenreResponse(
@@ -74,14 +61,9 @@ async def create_genre_view(
 @router.get("/api/genres/{id}")
 async def get_genre_by_id_view(
     id: Annotated[int, Path(gt=0)],
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user: Annotated[User, Depends(get_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    payload = verify_token(token)
-
-    if payload is None:
-        raise HTTPException(status_code=401, detail="invalid token.")
-
     genre = get_genre_by_id(db=db, id=id)
 
     response = GenreResponse(
@@ -94,15 +76,10 @@ async def get_genre_by_id_view(
 @router.patch("/api/genres/{id}")
 async def update_genre_by_id_view(
     id: Annotated[int, Path(gt=0)],
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user: Annotated[User, Depends(get_user)],
     db: Annotated[Session, Depends(get_db)],
     data: Annotated[GenreUpdate | None, Body] = None,
 ):
-    payload = verify_token(token)
-
-    if payload is None:
-        raise HTTPException(status_code=401, detail="invalid token.")
-
     genre = update_genre_by_id(
         db=db, id=id, name=data.name, description=data.description
     )
@@ -115,30 +92,20 @@ async def update_genre_by_id_view(
 @router.delete("/api/genres/{id}", status_code=204)
 async def delete_genre_by_id_view(
     id: Annotated[int, Path(gt=0)],
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user: Annotated[User, Depends(get_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    payload = verify_token(token)
-
-    if payload is None:
-        raise HTTPException(status_code=401, detail="invalid token.")
-
-    genre = delete_genre_by_id(db=db, id=id)
+    delete_genre_by_id(db=db, id=id)
 
 
 @router.get("/genres/{id}/books")
 async def get_genre_books_view(
     id: Annotated[int, Path(gt=0)],
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user: Annotated[User, Depends(get_user)],
     db: Annotated[Session, Depends(get_db)],
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=0, le=100)] = 20,
 ):
-    payload = verify_token(token)
-
-    if payload is None:
-        raise HTTPException(status_code=401, detail="invalid token.")
-
     genres, books = get_genre_books(db=db, id=id, skip=skip, limit=limit)
 
     book_responses = []

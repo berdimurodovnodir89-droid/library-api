@@ -5,9 +5,10 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from sqlalchemy.orm import Session
 
 from app.schemas.user import UserRegister, UserResponse
-from app.dependencies import get_db
+from app.dependencies import get_db, get_user
 from app.crud.user import get_user_by_username, create_user, get_users
 from app.security import hash_password, verify_password, generate_token
+from app.models import User
 
 router = APIRouter(tags=["users"])
 
@@ -32,7 +33,9 @@ async def register_view(
 
 
 @router.get("/api/users", response_model=List[UserResponse])
-async def get_users_view(db: Annotated[Session, Depends(get_db)]):
+async def get_users_view(
+    user: Annotated[User, Depends(get_user)], db: Annotated[Session, Depends(get_db)]
+):
     return get_users(db)
 
 

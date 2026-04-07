@@ -1,10 +1,9 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Query, Path, Body, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
-from app.dependencies import get_db
+from app.dependencies import get_db, get_user
 from app.crud.book import (
     get_books,
     create_book,
@@ -16,15 +15,14 @@ from app.schemas.book import BookListResponse, BookItemResponse, CreateBook, Upd
 from app.schemas.genre import GenreResponse
 from app.schemas.author import AuthorResponse
 from app.security import verify_token
+from app.models import User
 
 router = APIRouter(tags=["books"])
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 
 @router.get("/api/books", response_model=BookListResponse, status_code=200)
 async def get_books_view(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user: Annotated[User, Depends(get_user)],
     db: Annotated[Session, Depends(get_db)],
     search: Annotated[str, Query()] = "",
     author_id: Annotated[int | None, Query()] = None,
@@ -34,11 +32,6 @@ async def get_books_view(
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=0, le=100)] = 20,
 ):
-    payload = verify_token(token)
-
-    if payload is None:
-        raise HTTPException(status_code=401, detail="invalid token.")
-
     books = get_books(
         db=db,
         search=search,
@@ -83,15 +76,10 @@ async def get_books_view(
 
 @router.post("/api/books", response_model=BookItemResponse, status_code=201)
 async def create_book_view(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user: Annotated[User, Depends(get_user)],
     db: Annotated[Session, Depends(get_db)],
     data: Annotated[CreateBook, Body()],
 ):
-    payload = verify_token(token)
-
-    if payload is None:
-        raise HTTPException(status_code=401, detail="invalid token.")
-
     book = create_book(
         db=db,
         title=data.title,
@@ -109,14 +97,9 @@ async def create_book_view(
 @router.get("/api/books/{id}")
 async def get_genre_by_id_view(
     id: Annotated[int, Path(gt=0)],
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user: Annotated[User, Depends(get_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    payload = verify_token(token)
-
-    if payload is None:
-        raise HTTPException(status_code=401, detail="invalid token.")
-
     book = get_book_by_id(db, id)
 
     author = AuthorResponse(
@@ -148,15 +131,10 @@ async def get_genre_by_id_view(
 @router.patch("/api/books/{id}")
 async def update_book_by_id_view(
     id: Annotated[int, Path(gt=0)],
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user: Annotated[User, Depends(get_user)],
     db: Annotated[Session, Depends(get_db)],
     data: Annotated[UpdateBook, Body] = None,
 ):
-    payload = verify_token(token)
-
-    if payload is None:
-        raise HTTPException(status_code=401, detail="invalid token.")
-
     book = update_book_by_id(
         db=db,
         id=id,
@@ -198,12 +176,7 @@ async def update_book_by_id_view(
 @router.delete("/api/books/{id}", status_code=204)
 async def delete_book_by_id_view(
     id: Annotated[int, Path(gt=0)],
-    token: Annotated[str, Depends(oauth2_scheme)],
+    user: Annotated[User, Depends(get_user)],
     db: Annotated[Session, Depends(get_db)],
 ):
-    payload = verify_token(token)
-
-    if payload is None:
-        raise HTTPException(status_code=401, detail="invalid token.")
-
     delete_book_by_id(db, id)
